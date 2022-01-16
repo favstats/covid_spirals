@@ -1,0 +1,232 @@
+pacman::p_load(tidyverse, ggtext, lubridate, viridis)
+
+owid_url <- "https://github.com/owid/covid-19-data/blob/master/public/data/owid-covid-data.csv?raw=true"
+# country <- "United States"
+covid <- read_csv(owid_url)
+
+# eu_countries <- c("Austria", "Belgium", "Bulgaria", "Croatia", 
+#                   "Cyprus", "Czechia", "Denmark", 
+#                   "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", 
+#                   "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg", "Malta", 
+#                   "Netherlands", "Poland", "Portugal", "Romania", "Slovakia", "Slovenia", 
+#                   "Spain", "Sweden")
+# 
+# eu_countries <- c(#"Germany", "United States", "Italy", 
+#   "United Kingdom")
+
+
+
+eu_first_rows <- covid %>% 
+  # filter(location %in% eu_countries) %>% 
+  distinct(location) %>%
+  mutate(date = as_date("2020-01-01"), 
+         new_cases = 0,
+         new_cases_smoothed = 0,
+         new_cases_per_million = 0, 
+         new_cases_smoothed_per_million = 0, 
+         new_deaths = 0,
+         new_deaths_smoothed = 0,
+         new_deaths_per_million = 0, 
+         new_deaths_smoothed_per_million = 0)
+# pull(location)
+
+
+covid_cases <- covid %>% 
+  # filter(location %in% eu_countries) %>% 
+  select(date, 
+         new_cases,
+         new_cases_smoothed,
+         new_deaths,
+         new_deaths_smoothed,
+         new_cases_per_million, 
+         new_cases_smoothed_per_million, 
+         new_deaths_per_million,
+         new_deaths_smoothed_per_million,
+         location) %>%
+  # Add the dates before the 1st confirmed case
+  bind_rows(eu_first_rows) %>% 
+  arrange(date) %>% 
+  group_by(location) %>% 
+  complete(date = seq(min(.$date), max(.$date), by = 1),
+           fill = list(new_cases = 0,
+                       new_cases_smoothed = 0,
+                       new_cases_per_million = 0, 
+                       new_cases_smoothed_per_million = 0, 
+                       new_deaths = 0,
+                       new_deaths_smoothed = 0,
+                       new_deaths_per_million = 0, 
+                       new_deaths_smoothed_per_million = 0)) %>% 
+  mutate(day_of_year = yday(date),
+         year = year(date)
+  ) %>% 
+  ungroup()  %>% 
+  # 2020 is a leap year, we could drop Feb 29, 2020 for the sake of 365-day years
+  filter(date != as_date("2020-02-29")) %>%
+  group_by(year, location) %>%
+  mutate(day_of_year = row_number()) %>%
+  ungroup() 
+
+saveRDS(covid_cases, file = "data/covid_cases.rds")
+
+
+size_factor1 <- 15000
+
+# Colors
+outline_color <- "#D97C86"
+fill_color <- "#F0C0C1"
+base_grey <- "grey28"
+
+
+
+month_length <- c(31, 28, 31, 30, 31, 30,
+                  31, 31, 30, 31, 30, 31)
+
+month_breaks <- cumsum(month_length) - 30
+
+# covid_cases <- readRDS("data/covid_cases.rds")
+
+p <- covid_cases %>% 
+  filter(location %in% c("Italy", "United Kingdom", "United States", "Netherlands")
+  ) %>% 
+  mutate(location = ifelse(location == "United Kingdom", "UK", location)) %>% 
+  ggplot() +
+  # area
+  geom_linerange(aes(x = day_of_year, 
+                     ymin = as.POSIXct(date) - new_cases_smoothed_per_million / 2 * size_factor1,
+                     ymax = as.POSIXct(date) + new_cases_smoothed_per_million / 2 * size_factor1,
+                     group = year, color = new_cases_smoothed_per_million), width = 0,
+                 # color = outline_color, 
+                 size = 1.5, show.legend = T) +
+  # basic line
+  geom_segment(aes(x = day_of_year, xend = day_of_year + 1, 
+                   y = as.POSIXct(date), yend = as.POSIXct(date)),
+               col = base_grey, size = 0.3, alpha = 0.5) +
+  scale_x_continuous(minor_breaks = month_breaks, 
+                     breaks = month_breaks,
+                     labels = c("Jan.", "Feb.", "March", "April", "May", "June", "July", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."),
+                     limits = c(1, 365),
+                     expand = c(0, 0)
+  ) +
+  #' set the lower limit of the y-axis to a date before 2020 
+  #' so that the spiral does not start in the center point
+  scale_y_continuous(limits = c(as.POSIXct("2019-07-01"), NA),
+                     expand = c(0, 0)) +
+  coord_polar() +
+  theme_void()  +
+  labs(title = "Spirals of COVID-19") +
+       # subtitle="7-day average cases per million people") +
+       # caption="Data: Our World in Data | Inspired by: NYT | Initial Code: Ansgar Wolsing (@_ansgar) | Visualization: Fabio Votta (@favstats)") +
+  theme(
+    legend.position = "top", 
+    plot.margin=unit(c(0,0,0.25,0),"cm"),
+    plot.title = element_text(hjust = 0.5, size = 15, margin = margin(b = 8)),
+    plot.subtitle = element_text(hjust = 0.5, size = 8, margin = margin(b = 15)),
+    plot.caption = element_text(hjust = 1, size = 4),
+    plot.background = element_rect(color = NA, fill = "white"),
+    panel.grid.major.x = element_line(color = "grey70", size = 0.2, linetype = "dotted"),
+    panel.grid.minor.x = element_line(color = "grey70", size = 0.2, linetype = "dotted"),
+    axis.text.x = element_text(color = base_grey, size = 5, hjust = 0.5)
+  ) +
+  # facet_wrap(~location, ncol = 2) +
+  viridis::scale_color_viridis(option = "rocket", direction = -1) + 
+  guides(color = guide_colourbar(title = "7-day average cases per million", 
+                                 title.vjust = 1,
+                                 title.theme = element_text(size = 10.5),
+                                 label.theme = element_text(size = 6.5),
+                                 barwidth = 5, barheight = 0.5)) +
+  facet_wrap(~location, nrow = 1)
+
+size_factor2 <- 1500000
+
+p2 <- covid_cases %>% 
+  filter(location %in% c("Italy", "United Kingdom", "United States", "Netherlands")
+  ) %>% 
+  mutate(location = ifelse(location == "United Kingdom", "UK", location)) %>% 
+  ggplot() +
+  # area
+  geom_linerange(aes(x = day_of_year, 
+                     ymin = as.POSIXct(date) - new_deaths_smoothed_per_million / 2 * size_factor2,
+                     ymax = as.POSIXct(date) + new_deaths_smoothed_per_million / 2 * size_factor2,
+                     group = year, color = new_deaths_smoothed_per_million), width = 0,
+                 # color = outline_color, 
+                 size = 1.5, show.legend = T) +
+  # basic line
+  geom_segment(aes(x = day_of_year, xend = day_of_year + 1, 
+                   y = as.POSIXct(date), yend = as.POSIXct(date)),
+               col = base_grey, size = 0.3, alpha = 0.5) +
+  scale_x_continuous(minor_breaks = month_breaks, 
+                     breaks = month_breaks,
+                     labels = c("Jan.", "Feb.", "March", "April", "May", "June", "July", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."),
+                     limits = c(1, 365),
+                     expand = c(0, 0)
+  ) +
+  #' set the lower limit of the y-axis to a date before 2020 
+  #' so that the spiral does not start in the center point
+  scale_y_continuous(limits = c(as.POSIXct("2019-07-01"), NA),
+                     expand = c(0, 0)) +
+  coord_polar() +
+  theme_void()  +
+  labs(#title = "Spirals of COVID-19",
+    # subtitle="7-day average deaths per million people",
+    caption=paste0("Last Update: ", Sys.Date(), "| Data: Our World in Data | Inspired by: NYT | Initial Code: Ansgar Wolsing (@_ansgar) | Visualization: Fabio Votta (@favstats)")) +
+  theme(
+    legend.position = "top",
+    plot.title = element_text(hjust = 0.5, size = 11),
+    plot.subtitle = element_text(hjust = 0.5, size = 8, margin = margin(t = 25, b = 15)),
+    plot.caption = element_text(hjust = 1, size = 8),
+    plot.background = element_rect(color = NA, fill = "white"),
+    panel.grid.major.x = element_line(color = "grey70", size = 0.2, linetype = "dotted"),
+    panel.grid.minor.x = element_line(color = "grey70", size = 0.2, linetype = "dotted"),
+    axis.text.x = element_text(color = base_grey, size = 5, hjust = 0.5)
+  ) +
+  # facet_wrap(~location, ncol = 2) +
+  viridis::scale_color_viridis(option = "mako", direction = -1) + 
+  guides(color = guide_colourbar(title = "7-day average deaths per million", 
+                                 title.vjust = 1,
+                                 title.theme = element_text(size = 10.5),
+                                 label.theme = element_text(size = 6.5),
+                                 barwidth = 5, barheight = 0.5)) +
+  facet_wrap(~location, nrow = 1)
+
+library(patchwork)
+# p
+
+yes <- p / p2
+
+ggsave(plot = yes, filename = "combined.png", width = 8, height = 5, dpi = 300)
+
+# p <- p  +
+#   transition_reveal(date) +
+#   ease_aes('linear')
+# 
+# p2 <- p2  +
+#   transition_reveal(date) +
+#   ease_aes('linear')
+# 
+# 
+# p <- p %>%
+#   animate(nframes = 100, fps = 10, #duration = 25,
+#           width = 2000, height = 2000,
+#           res = 300, end_pause = 70)
+# 
+# p2 <- p2 %>%
+#   animate(nframes = 100, fps = 10, #duration = 25,
+#           width = 2000, height = 2000,
+#           res = 300, end_pause = 70)
+# 
+# anim_save("p1.gif", animation = p)
+# anim_save("p2.gif", animation = p2)
+# 
+# library(magick)
+# a_mgif <- image_read("p1.gif")
+# b_mgif <- image_read("p2.gif")
+# 
+# new_gif <- image_append(c(a_mgif[1], b_mgif[1]), stack = TRUE)
+# for(i in 2:50){
+#   combined <- image_append(c(a_mgif[i], b_mgif[i]), stack = TRUE)
+#   new_gif <- c(new_gif, combined)
+# }
+# 
+# image_write_gif(new_gif, path = "result.gif")
+
+# beepr::beep(20)

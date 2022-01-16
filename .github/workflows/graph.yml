@@ -1,0 +1,37 @@
+name: "Update Graph"
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+    branches:
+      - master
+      - main
+  schedule:
+    - cron: '0 23 * * *'
+      
+jobs:
+  update-data:
+    name: Update Graph
+    runs-on: "macos-latest"
+    steps:
+      - uses: r-lib/actions/setup-r@v1
+        with:
+          r-version: 'release'
+      - name: Setup - Checkout repo
+        uses: actions/checkout@v2
+      - name: "Setup - Install Packages"
+        run: |
+          install.packages('tidyverse')
+          install.packages('ggtext')
+          install.packages('lubridate')
+          install.packages('viridis')
+          install.packages('pacman')
+        shell: Rscript {0}
+      - name: "Generate - Chart"
+        run: Rscript 'generate_charts.R'
+      - name: "Commit"
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Bot Routine
