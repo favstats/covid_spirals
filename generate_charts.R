@@ -166,7 +166,7 @@ p2 <- covid_cases %>%
   theme_void()  +
   labs(#title = "Spirals of COVID-19",
     # subtitle="7-day average deaths per million people",
-    caption=paste0("Last Update: ", Sys.Date(), "| Data: Our World in Data | Inspired by: NYT | Initial Code: Ansgar Wolsing (@_ansgar) | Visualization: Fabio Votta (@favstats)")) +
+    caption=paste0("Last Update: ", Sys.Date(), " | Data: Our World in Data | Inspired by: NYT | Initial Code: Ansgar Wolsing (@_ansgar) | Visualization: Fabio Votta (@favstats)")) +
   theme(
     legend.position = "top",
     plot.title = element_text(hjust = 0.5, size = 11),
