@@ -27,6 +27,7 @@ jobs:
           install.packages('ggtext')
           install.packages('lubridate')
           install.packages('viridis')
+          install.packages('patchwork')
           install.packages('pacman')
         shell: Rscript {0}
       - name: "Generate - Chart"

@@ -1,7 +1,6 @@
-pacman::p_load(tidyverse, ggtext, lubridate, viridis)
+pacman::p_load(tidyverse, ggtext, lubridate, viridis, patchwork)
 
 owid_url <- "https://github.com/owid/covid-19-data/blob/master/public/data/owid-covid-data.csv?raw=true"
-# country <- "United States"
 covid <- read_csv(owid_url)
 
 # eu_countries <- c("Austria", "Belgium", "Bulgaria", "Croatia", 
@@ -15,8 +14,7 @@ covid <- read_csv(owid_url)
 #   "United Kingdom")
 
 
-
-eu_first_rows <- covid %>% 
+first_rows <- covid %>% 
   # filter(location %in% eu_countries) %>% 
   distinct(location) %>%
   mutate(date = as_date("2020-01-01"), 
@@ -44,7 +42,7 @@ covid_cases <- covid %>%
          new_deaths_smoothed_per_million,
          location) %>%
   # Add the dates before the 1st confirmed case
-  bind_rows(eu_first_rows) %>% 
+  bind_rows(first_rows) %>% 
   arrange(date) %>% 
   group_by(location) %>% 
   complete(date = seq(min(.$date), max(.$date), by = 1),
@@ -188,45 +186,8 @@ p2 <- covid_cases %>%
                                  barwidth = 5, barheight = 0.5)) +
   facet_wrap(~location, nrow = 1)
 
-library(patchwork)
 # p
 
 yes <- p / p2
 
 ggsave(plot = yes, filename = "combined.png", width = 8, height = 5, dpi = 300)
-
-# p <- p  +
-#   transition_reveal(date) +
-#   ease_aes('linear')
-# 
-# p2 <- p2  +
-#   transition_reveal(date) +
-#   ease_aes('linear')
-# 
-# 
-# p <- p %>%
-#   animate(nframes = 100, fps = 10, #duration = 25,
-#           width = 2000, height = 2000,
-#           res = 300, end_pause = 70)
-# 
-# p2 <- p2 %>%
-#   animate(nframes = 100, fps = 10, #duration = 25,
-#           width = 2000, height = 2000,
-#           res = 300, end_pause = 70)
-# 
-# anim_save("p1.gif", animation = p)
-# anim_save("p2.gif", animation = p2)
-# 
-# library(magick)
-# a_mgif <- image_read("p1.gif")
-# b_mgif <- image_read("p2.gif")
-# 
-# new_gif <- image_append(c(a_mgif[1], b_mgif[1]), stack = TRUE)
-# for(i in 2:50){
-#   combined <- image_append(c(a_mgif[i], b_mgif[i]), stack = TRUE)
-#   new_gif <- c(new_gif, combined)
-# }
-# 
-# image_write_gif(new_gif, path = "result.gif")
-
-# beepr::beep(20)
