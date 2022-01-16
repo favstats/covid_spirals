@@ -66,7 +66,7 @@ covid_cases <- covid %>%
   mutate(day_of_year = row_number()) %>%
   ungroup() 
 
-saveRDS(covid_cases, file = "data/covid_cases.rds")
+# saveRDS(covid_cases, file = "data/covid_cases.rds")
 
 
 size_factor1 <- 15000
