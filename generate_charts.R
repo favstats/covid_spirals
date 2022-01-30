@@ -190,7 +190,7 @@ p2 <- covid_cases %>%
 
 yes <- p / p2
 
-ggsave(plot = yes, filename = "combined.png", width = 8, height = 5, dpi = 300)
+ggsave(plot = yes, filename = "combined.png", width = 8, height = 5, dpi = 300, bg = "white")
 
 
 
@@ -417,7 +417,7 @@ cntries <- c("Germany", "Netherlands")
 
 pp <- plot_combined_spirals(cntries, size_factor1, size_factor2)
 
-ggsave(plot = pp, filename = "deaths_and_cases_denl.png", width = 7, height = 5, dpi = 300)
+ggsave(plot = pp, filename = "deaths_and_cases_denl.png", width = 7, height = 5, dpi = 300, bg = "white")
 
 
 cntries <- c("United Kingdom", "United States")
@@ -428,7 +428,7 @@ size_factor2 <- 2000000
 
 pp2 <- plot_combined_spirals(cntries, size_factor1, size_factor2, "white")
 
-ggsave(plot = pp2, filename = "deaths_and_cases_ukus.png", width = 7, height = 5, dpi = 300)
+ggsave(plot = pp2, filename = "deaths_and_cases_ukus.png", width = 7, height = 5, dpi = 300, bg = "white")
 
 cntries <- c("Poland", "Hungary")
 
@@ -438,6 +438,6 @@ cntries <- c("Poland", "Hungary")
 
 pp3 <- plot_combined_spirals(cntries, size_factor1, size_factor2, "black")
 
-ggsave(plot = pp3, filename = "deaths_and_cases_hupl.png", width = 7, height = 5, dpi = 300)
+ggsave(plot = pp3, filename = "deaths_and_cases_hupl.png", width = 7, height = 5, dpi = 300, bg = "white")
 
 
