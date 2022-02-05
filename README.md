@@ -2,6 +2,10 @@
 
 ![](combined.png)
 
+
+![](combined2.png)
+
+
 # More COVID Spirals 
 
 ## Germany and Netherlands
