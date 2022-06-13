@@ -368,33 +368,33 @@ create_anim <- function(cntry) {
 
 p <- create_anim("United States")
 
-anim_save("us_deaths.gif", animation = p)
+anim_save("us_deaths.gif", animation = p, renderer = gifski_renderer())
 
 print("US")
 
 p <- create_anim("Germany")
 
-anim_save("de_deaths.gif", animation = p)
+anim_save("de_deaths.gif", animation = p, renderer = gifski_renderer())
 
 
 print("DE")
 
 p <- create_anim("United Kingdom")
 
-anim_save("uk_deaths.gif", animation = p)
+anim_save("uk_deaths.gif", animation = p, renderer = gifski_renderer())
 
 
 print("UK")
 
 p <- create_anim("Netherlands")
 
-anim_save("nl_deaths.gif", animation = p)
+anim_save("nl_deaths.gif", animation = p, renderer = gifski_renderer())
 
 print("NL")
 
 p <- create_anim("European Union")
 
-anim_save("eu_deaths.gif", animation = p)
+anim_save("eu_deaths.gif", animation = p, renderer = gifski_renderer())
 
 print("EU")
 
