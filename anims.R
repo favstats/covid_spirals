@@ -2,7 +2,7 @@
 ## Most Code comes from here: https://bydata.github.io/nyt-corona-spiral-chart/
 
 
-pacman::p_load(tidyverse, lubridate, gganimate, viridis, shadowtext)
+pacman::p_load(tidyverse, lubridate, gganimate, viridis, shadowtext, gifski)
 
 owid_url <- "https://github.com/owid/covid-19-data/blob/master/public/data/owid-covid-data.csv?raw=true"
 covid <- read_csv(owid_url)
