@@ -553,4 +553,4 @@ pp3 <- plot_combined_spirals(cntries, size_factor1, size_factor2, "black")
 
 ggsave(plot = pp3, filename = "deaths_and_cases_hupl.png", width = 7, height = 5, dpi = 300, bg = "white")
 
-
+source("anims.R")
