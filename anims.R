@@ -4,61 +4,61 @@
 
 pacman::p_load(tidyverse, lubridate, gganimate, viridis, shadowtext)
 
-# owid_url <- "https://github.com/owid/covid-19-data/blob/master/public/data/owid-covid-data.csv?raw=true"
-# covid <- read_csv(owid_url)
-# 
-# 
-# 
-# first_rows <- covid %>%
-#   distinct(location) %>%
-#   mutate(date = as_date("2020-01-01"),
-#          new_cases = 0,
-#          new_cases_smoothed = 0,
-#          new_cases_per_million = 0,
-#          new_cases_smoothed_per_million = 0,
-#          new_deaths = 0,
-#          new_deaths_smoothed = 0,
-#          new_deaths_per_million = 0,
-#          new_deaths_smoothed_per_million = 0)
-# 
-# covid_cases <- covid %>%
-#   select(date,
-#          new_cases,
-#          new_cases_smoothed,
-#          new_deaths,
-#          new_deaths_smoothed,
-#          new_cases_per_million,
-#          new_cases_smoothed_per_million,
-#          new_deaths_per_million,
-#          new_deaths_smoothed_per_million,
-#          location,
-#          population) %>%
-#   # Add the dates before the 1st confirmed case
-#   bind_rows(first_rows) %>%
-#   arrange(date) %>%
-#   group_by(location) %>%
-#   complete(date = seq(min(.$date), max(.$date), by = 1),
-#            fill = list(new_cases = 0,
-#                        new_cases_smoothed = 0,
-#                        new_cases_per_million = 0,
-#                        new_cases_smoothed_per_million = 0,
-#                        new_deaths = 0,
-#                        new_deaths_smoothed = 0,
-#                        new_deaths_per_million = 0,
-#                        new_deaths_smoothed_per_million = 0)) %>%
-#   mutate(day_of_year = yday(date),
-#          year = year(date)
-#   ) %>%
-#   ungroup()  %>%
-#   # 2020 is a leap year, we could drop Feb 29, 2020 for the sake of 365-day years
-#   filter(date != as_date("2020-02-29")) %>%
-#   group_by(year, location) %>%
-#   mutate(day_of_year = row_number()) %>%
-#   ungroup()
-# 
-# saveRDS(covid_cases, file = "data/covid_cases.rds")
+owid_url <- "https://github.com/owid/covid-19-data/blob/master/public/data/owid-covid-data.csv?raw=true"
+covid <- read_csv(owid_url)
 
-covid_cases <- readRDS("data/covid_cases.rds")
+
+
+first_rows <- covid %>%
+  distinct(location) %>%
+  mutate(date = as_date("2020-01-01"),
+         new_cases = 0,
+         new_cases_smoothed = 0,
+         new_cases_per_million = 0,
+         new_cases_smoothed_per_million = 0,
+         new_deaths = 0,
+         new_deaths_smoothed = 0,
+         new_deaths_per_million = 0,
+         new_deaths_smoothed_per_million = 0)
+
+covid_cases <- covid %>%
+  select(date,
+         new_cases,
+         new_cases_smoothed,
+         new_deaths,
+         new_deaths_smoothed,
+         new_cases_per_million,
+         new_cases_smoothed_per_million,
+         new_deaths_per_million,
+         new_deaths_smoothed_per_million,
+         location,
+         population) %>%
+  # Add the dates before the 1st confirmed case
+  bind_rows(first_rows) %>%
+  arrange(date) %>%
+  group_by(location) %>%
+  complete(date = seq(min(.$date), max(.$date), by = 1),
+           fill = list(new_cases = 0,
+                       new_cases_smoothed = 0,
+                       new_cases_per_million = 0,
+                       new_cases_smoothed_per_million = 0,
+                       new_deaths = 0,
+                       new_deaths_smoothed = 0,
+                       new_deaths_per_million = 0,
+                       new_deaths_smoothed_per_million = 0)) %>%
+  mutate(day_of_year = yday(date),
+         year = year(date)
+  ) %>%
+  ungroup()  %>%
+  # 2020 is a leap year, we could drop Feb 29, 2020 for the sake of 365-day years
+  filter(date != as_date("2020-02-29")) %>%
+  group_by(year, location) %>%
+  mutate(day_of_year = row_number()) %>%
+  ungroup()
+
+#saveRDS(covid_cases, file = "data/covid_cases.rds")
+
+#covid_cases <- readRDS("data/covid_cases.rds")
 
 ##### plot #####
 
@@ -354,7 +354,7 @@ create_anim <- function(cntry) {
   p <- p %>%
     animate(nframes = 400, fps = 20, #duration = 25,
             width = 1500, height = 1500,
-            res = 450, end_pause = 70)
+            res = 450, end_pause = 70, renderer = gifski_renderer())
   
   # p <- p %>%
   #   animate(nframes = 100, fps = 20, #duration = 25,
