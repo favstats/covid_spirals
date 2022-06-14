@@ -333,7 +333,7 @@ create_anim <- function(cntry) {
              label = paste0(year_annotations$year[3], "\u2192"), 
              x = 3,
              y = year_annotations$y[3],
-             family = "Arial", color = "white",
+             family = "Arial",# color = "white",
              size = 1.2, 
              vjust = -2, 
              hjust = 0) +
